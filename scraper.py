@@ -2,7 +2,8 @@ import requests
 import json
 import time
 import os
-import logging  # <-- NEW: Import logging
+import logging 
+import config
 
 # --- Setup Professional Logging ---
 logging.basicConfig(
@@ -14,15 +15,6 @@ logging.basicConfig(
     ]
 )
 
-# --- Configuration Constants ---
-BASE_URL = "https://issues.apache.org/jira/rest/api/2/search"
-REQUEST_FIELDS = "summary,description,comment,status,priority,assignee,labels,created,updated,issuetype,reporter"
-PAGE_SIZE = 100
-PROJECTS_TO_FETCH = ["SPARK", "KAFKA", "HADOOP"]
-CHECKPOINT_FILE = 'checkpoint.json'
-OUTPUT_FILE = 'jira_corpus_raw.jsonl'
-MAX_RETRIES = 5
-NETWORK_TIMEOUT = 30 # Seconds
 
 
 class JiraScraper:
@@ -31,12 +23,12 @@ class JiraScraper:
     with checkpointing and error handling.
     """
     
-    def __init__(self, projects, base_url, fields, output_file, checkpoint_file):
-        self.projects_to_fetch = projects
-        self.base_url = base_url
-        self.request_fields = fields
-        self.output_file = output_file
-        self.checkpoint_file = checkpoint_file
+    def __init__(self):
+        self.projects_to_fetch = config.PROJECTS_TO_FETCH
+        self.base_url = config.BASE_URL
+        self.request_fields = config.REQUEST_FIELDS
+        self.output_file = config.RAW_DATA_FILE
+        self.checkpoint_file = config.CHECKPOINT_FILE
         self.checkpoint_data = self._load_checkpoint()
 
     def _load_checkpoint(self):
@@ -80,13 +72,13 @@ class JiraScraper:
         params = {
             'jql': f"project = {project_key}",
             'fields': self.request_fields,
-            'maxResults': PAGE_SIZE,
+            'maxResults': config.PAGE_SIZE,
             'startAt': start_at
         }
         
-        for attempt in range(MAX_RETRIES):
+        for attempt in range(config.MAX_RETRIES):
             try:
-                response = requests.get(self.base_url, params=params, timeout=NETWORK_TIMEOUT)
+                response = requests.get(self.base_url, params=params, timeout=config.NETWORK_TIMEOUT)
 
                 if response.status_code == 429:
                     logging.warning("Rate limited (429). Sleeping for 60 seconds...")
@@ -108,7 +100,7 @@ class JiraScraper:
                 logging.warning(f"Network request failed: {e}. Retrying in 15 seconds...")
                 time.sleep(15)
                 
-        logging.error(f"Failed to fetch data for {project_key} at {start_at} after {MAX_RETRIES} retries.")
+        logging.error(f"Failed to fetch data for {project_key} at {start_at} after {config.MAX_RETRIES} retries.")
         return None
 
     def run_pipeline(self):
@@ -181,13 +173,7 @@ class JiraScraper:
 # --- Main execution ---
 if __name__ == "__main__":
     # 1. Create an instance of the scraper
-    scraper = JiraScraper(
-        projects=PROJECTS_TO_FETCH,
-        base_url=BASE_URL,
-        fields=REQUEST_FIELDS,
-        output_file=OUTPUT_FILE,
-        checkpoint_file=CHECKPOINT_FILE
-    )
+    scraper = JiraScraper()
     
     # 2. Run the pipeline
     scraper.run_pipeline()

@@ -3,10 +3,7 @@ import os
 import logging
 import re
 from bs4 import BeautifulSoup
-
-# --- Configuration ---
-RAW_INPUT_FILE = 'jira_corpus_raw.jsonl'
-LLM_OUTPUT_FILE = 'jira_corpus_llm_ready.jsonl'
+import config
 
 # --- Setup Logging ---
 logging.basicConfig(
@@ -21,8 +18,8 @@ logging.basicConfig(
 class DataTransformer:
     
     def __init__(self, raw_file, llm_file):
-        self.raw_input_file = raw_file
-        self.llm_output_file = llm_file
+        self.raw_input_file = config.RAW_DATA_FILE
+        self.llm_output_file = config.LLM_DATA_FILE
 
     def _clean_text(self, text):
         """
@@ -176,9 +173,6 @@ class DataTransformer:
 # --- Main execution ---
 if __name__ == "__main__":
     
-    transformer = DataTransformer(
-        raw_file=RAW_INPUT_FILE,
-        llm_file=LLM_OUTPUT_FILE
-    )
+    transformer = DataTransformer()
     
     transformer.run_transformation()
