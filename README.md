@@ -64,6 +64,9 @@ python transform.py
 ```
 This will read `jira_corpus_raw.jsonl` and create `jira_corpus_llm_ready.jsonl`.
 
+---
+
+
 ## 📂 Project Structure
 ```bash
 Jira_Scraper/
@@ -79,9 +82,12 @@ Jira_Scraper/
 ```
 *(Runtime files like `scraper.log`, `transform.log`, and `checkpoint.json` will be created when the scripts are run.)*
 
+---
+
+
 ## 📊 Data Samples
  `sample_raw.jsonl` (Before)
 This file shows the raw, nested JSON data as it comes directly from the Jira API.  
-`sample_llm.jsonl` (After)
 
+`sample_llm.jsonl` (After)
 This file shows the final, clean, LLM-ready training data. Note how each raw issue has been transformed into multiple, flat "prompt/completion" pairs.
