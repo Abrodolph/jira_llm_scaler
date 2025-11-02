@@ -1,0 +1,17 @@
+# Python virtual environment
+Jira/
+
+# Log files
+scraper.log
+transform.log
+
+# Python cache
+__pycache__/
+
+# --- Data Files ---
+# Ignore all .jsonl files...
+*.jsonl
+
+# ...EXCEPT for our sample files.
+!sample_raw.jsonl
+!sample_llm.jsonl
